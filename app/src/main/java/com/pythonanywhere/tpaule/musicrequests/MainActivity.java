@@ -292,8 +292,6 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
         if (itemToUpvote.upvoted){
             itemToUpvote.upvoted = false;
             //itemToUpvote.upvotes--;
-            // send to say that we unupvoted
-            // MARdoneIUS
             songId = itemToUpvote.songID;
             voteIncrement = "-1";
             try {
@@ -311,8 +309,6 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
                 if (item.upvoted && item != itemToUpvote) {
                     item.upvoted = false;
                     //item.upvotes--;
-                    // send to say we unupvoted
-                    // MARdoneIUS
                     songId = itemToUpvote.songID;
                     voteIncrement = "-1";
                     try {
@@ -395,10 +391,6 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
             setDisplayText();
         }
         currentArtist.setText(currentArtistName);
-
-        // here get list from server
-        // MARIUS
-        //listItems = newListFromServer;
         sortList();
         adapter.notifyDataSetChanged();
     }
