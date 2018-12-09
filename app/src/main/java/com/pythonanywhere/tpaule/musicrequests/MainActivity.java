@@ -45,6 +45,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity implements CustomAdapter2.ListItemListener {
 
@@ -153,6 +155,20 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
 
         mLayoutManager = new LinearLayoutManager(this);
         songList.setLayoutManager(mLayoutManager);
+
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    getTheRoomsJsonByRoomId();
+                    Thread.sleep(500);
+                }
+                catch (Exception e) {
+                }
+
+            }
+        });
     }
 
     public void enteredRoomID(View view) {
@@ -180,12 +196,8 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
         currentArtist.setText(currentArtistName);
 
         listItems = new ArrayList<>();
-//        try {
-            getTheRoomsJsonByRoomId();
-//        }
-//        catch (Exception e) {
-//            Log.d("mytag", e.toString());
-//        }
+
+        getTheRoomsJsonByRoomId();
         // get a list of songs from the server
         // MARdoneIUS, replace the for loop below (only placeholder so there are items in the list)
         // MARIUS add get for the current vote count every x seconds
@@ -274,13 +286,14 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
     public void upvoteItem(MyListItem itemToUpvote, int itemPosition) {
         if (itemToUpvote.upvoted){
             itemToUpvote.upvoted = false;
-            itemToUpvote.upvotes--;
+            //itemToUpvote.upvotes--;
             // send to say that we unupvoted
             // MARdoneIUS
             songId = itemToUpvote.songID;
             voteIncrement = "-1";
             try {
                 sendToFin();
+                updateVote(itemToUpvote);
             }
             catch (Exception e) {
                 Log.d("mytag", e.toString());
@@ -292,13 +305,14 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
             for (MyListItem item : listItems) {
                 if (item.upvoted && item != itemToUpvote) {
                     item.upvoted = false;
-                    item.upvotes--;
+                    //item.upvotes--;
                     // send to say we unupvoted
                     // MARdoneIUS
                     songId = itemToUpvote.songID;
                     voteIncrement = "-1";
                     try {
                         sendToFin();
+                        updateVote(itemToUpvote);
                     }
                     catch (Exception e) {
                         Log.d("mytag", e.toString());
@@ -307,11 +321,12 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
                 }
             }
             itemToUpvote.upvoted = true;
-            itemToUpvote.upvotes++;
+            //itemToUpvote.upvotes++;
             songId = itemToUpvote.songID;
             voteIncrement = "1";
             try {
                 sendToFin();
+                updateVote(itemToUpvote);
             }
             catch (Exception e) {
                 Log.d("mytag", e.toString());
@@ -535,6 +550,69 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
                 int votes = song.getAsJsonObject().get("votes").getAsInt();
 
                 listItems.add(new MyListItem(artist, name, votes, songID));
+            }
+        }
+        else {
+            throw new IllegalArgumentException("No such roomID.");
+        }
+    }
+
+    public void updateVote(MyListItem theSongThatIsPassedToMethod) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try  {
+                    String sURL = "http://10.40.156.24:2567/api/rooms"; //just a string
+                    URL url = new URL(sURL);
+                    HttpURLConnection huc = (HttpURLConnection) url.openConnection();
+                    HttpURLConnection.setFollowRedirects(false);
+                    huc.setConnectTimeout(1 * 1000);
+                    huc.setRequestMethod("GET");
+                    huc.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.1.2) Gecko/20090729 Firefox/3.5.2 (.NET CLR 3.5.30729)");
+                    huc.connect();
+
+                    // Convert to a JSON object to print data
+                    JsonParser jp = new JsonParser(); //from gson
+                    JsonElement root = jp.parse(new InputStreamReader((InputStream) huc.getContent())); //Convert the input stream to a json element
+                    JsonObject rootobj = root.getAsJsonObject(); //May be an array, may be an object.
+                    infoAboutRoom = rootobj;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    latch.countDown();
+                }
+            }
+        });
+        thread.start();
+
+        latch.await();
+
+        if (infoAboutRoom == null) {
+            Log.d("mytag", "JSON not found");
+        }
+
+        Log.d("mytag", infoAboutRoom.toString());
+
+        String roomIDtoGet = "" + roomID;
+        boolean JSONhasTheRoomId = false;
+
+        Set<Map.Entry<String, JsonElement>> roomIDs = infoAboutRoom.entrySet();
+        for (Map.Entry<String, JsonElement> roomID : roomIDs) {
+            if (roomID.getKey().equals(roomIDtoGet)) {
+                JSONhasTheRoomId = true;
+            }
+        }
+
+        if (JSONhasTheRoomId) {
+            JsonArray songArray = infoAboutRoom.getAsJsonObject().get(roomIDtoGet).getAsJsonArray();
+            for (int j = 0; j < songArray.size(); j++) {
+                JsonElement song = songArray.get(j);
+                String songID = song.getAsJsonObject().get("songID").getAsString();
+                if (songID.equals(theSongThatIsPassedToMethod.songID)) {
+                    int votes = song.getAsJsonObject().get("votes").getAsInt();
+                    theSongThatIsPassedToMethod.upvotes = votes;
+                }
             }
         }
         else {
