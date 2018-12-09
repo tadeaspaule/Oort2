@@ -187,14 +187,6 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
     }
 
     private void setupList() throws Exception {
-        // room id stored in roomID variable
-        // get current song & artist
-        // MARIUS
-        String currentSongName = "PLACEHOLDER SONG"; // replace with current song name
-        String currentArtistName = "PLACEHOLDER ARTIST"; // replace with current artist name
-        setDetails(currentSongName,maxCharacters);
-        setDisplayText();
-        currentArtist.setText(currentArtistName);
 
         listItems = new ArrayList<>();
 
@@ -202,6 +194,17 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
         // get a list of songs from the server
         // MARIUS add get for the current vote count every x seconds
         sortList();
+
+        // room id stored in roomID variable
+        // get current song & artist
+        // MARIUS
+//        String currentSongName = "PLACEHOLDER SONG"; // replace with current song name
+//        String currentArtistName = "PLACEHOLDER ARTIST"; // replace with current artist name
+        String currentSongName = listItems.get(0).songName; // replace with current song name
+        String currentArtistName = listItems.get(0).artist; // replace with current artist name
+        setDetails(currentSongName,maxCharacters);
+        setDisplayText();
+        currentArtist.setText(currentArtistName);
 
         adapter = new CustomAdapter2(this,listItems);
         songList.setAdapter(adapter);
@@ -286,68 +289,77 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
 
     @Override
     public void upvoteItem(MyListItem itemToUpvote, int itemPosition) {
-        boolean isSecond = false;
         MyListItem previousItem = null;
-        for (MyListItem item : listItems) {
-            if (item.upvoted && item != itemToUpvote) {
-                isSecond = true;
-                previousItem = item;
-                break;
-            }
-        }
-
-        if (isSecond) {
-            // upvote itemtoupvote, downvote previousitem
+        if (itemToUpvote.upvoted){
+            // downvoting itemToUpvote
+            // upvoted to false
             songId = itemToUpvote.songID;
-            voteIncrement = "+1";
-            try {
-                sendToFin();
-                updateVote(itemToUpvote);
-                itemToUpvote.upvoted = true;
-            }
-            catch (Exception e) {
-                Log.d("mytag", e.toString());
-            }
-
-            songId = previousItem.songID;
             voteIncrement = "-1";
             try {
                 sendToFin();
-                updateVote(previousItem);
                 itemToUpvote.upvoted = false;
+                updateVote(itemToUpvote);
             }
             catch (Exception e) {
                 Log.d("mytag", e.toString());
             }
         }
         else {
-            if (itemToUpvote.upvoted) {
-                // downvote itemtoupvote
-                songId = itemToUpvote.songID;
+            boolean otherFound = false;
+            for (MyListItem item : listItems) {
+                if (item.upvoted && item != itemToUpvote) {
+                    otherFound = true;
+                    previousItem = item;
+                    break;
+                }
+            }
+            if (otherFound){
+                // downvote previouosItem
+                // upvoted to false
+                songId = previousItem.songID;
                 voteIncrement = "-1";
                 try {
                     sendToFin();
+                    previousItem.upvoted = false;
+                    updateVote(previousItem);
+                }
+                catch (Exception e) {
+                    Log.d("mytag", e.toString());
+                }
+
+                // upvote uvoteItem
+                //  upvoted to true
+                songId = itemToUpvote.songID;
+                voteIncrement = "1";
+                try {
+                    sendToFin();
+                    itemToUpvote.upvoted = true;
                     updateVote(itemToUpvote);
-                    itemToUpvote.upvoted = false;
                 }
                 catch (Exception e) {
                     Log.d("mytag", e.toString());
                 }
             }
             else {
-                // upvote itemtoupvote
+                // first timem upvoting
+                // upvote upvoteItem
+                // upvoted to true
                 songId = itemToUpvote.songID;
-                voteIncrement = "+1";
+                voteIncrement = "1";
                 try {
                     sendToFin();
-                    updateVote(itemToUpvote);
                     itemToUpvote.upvoted = true;
+                    updateVote(itemToUpvote);
                 }
                 catch (Exception e) {
                     Log.d("mytag", e.toString());
                 }
             }
         }
+
+        refreshList();
+        refreshUI();
+
         sortList();
         adapter.notifyItemRangeChanged(0, listItems.size());
     }
@@ -397,8 +409,10 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
 
         // get current song & artist name here
         // MARIUS
-        String currentSongName = "PLACEHOLDER SONG"; // replace with current song name
-        String currentArtistName = "PLACEHOLDER ARTIST"; // replace with current artist name
+//        String currentSongName = "PLACEHOLDER SONG"; // replace with current song name
+//        String currentArtistName = "PLACEHOLDER ARTIST"; // replace with current artist name
+        String currentSongName = listItems.get(0).songName;
+        String currentArtistName = listItems.get(0).artist;
         //currentSong.setText(currentSongName);
         if (!fullText.equals(currentSongName)) {
             // have to update current song text
@@ -413,7 +427,6 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
     public void refreshUI() {
         scrollByOne();
         setDisplayText();
-
     }
 
     // getting some popular artists / songs
@@ -471,15 +484,25 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
     }
 
     public void setDisplayText() {
-        String doubleFullText = fullText + "       " + fullText + "       ";
-        currentSong.setText(doubleFullText.substring(offset,offset+maxCharacters));
+        try {
+            String doubleFullText = fullText + "       " + fullText + "       ";
+            currentSong.setText(doubleFullText.substring(offset,offset+maxCharacters));
+
+        }
+        catch (Exception e) {
+            offset = 0;
+            String doubleFullText = fullText + "       " + fullText + "       ";
+            currentSong.setText(doubleFullText.substring(offset,offset+maxCharacters));
+        }
+
+
 
     }
 
     public void scrollByOne() {
         offset++;
-        if (offset > fullText.length() + 7) {
-            offset -= fullText.length() + 7;
+        if (offset >= fullText.length() + 6) {
+            offset -= (fullText.length() + 6);
         }
     }
 
@@ -497,9 +520,7 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
                     huc.setConnectTimeout(2 * 1000);
                     huc.setRequestMethod("GET");
                     huc.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.1.2) Gecko/20090729 Firefox/3.5.2 (.NET CLR 3.5.30729)");
-                    Log.d("mytag", "success3");
                     huc.connect();
-                    Log.d("mytag", "success4");
                     huc.getContent();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -554,6 +575,7 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
         }
 
         if (JSONhasTheRoomId) {
+            listItems.clear();
             Set<String> keyset = infoAboutRoom.get(roomIDtoGet).getAsJsonObject().keySet();
             for (String currentlyProcessesedSongId : keyset){
                 JsonObject songJson = infoAboutRoom.get(roomIDtoGet).getAsJsonObject().get(currentlyProcessesedSongId).getAsJsonObject();
@@ -581,10 +603,12 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
                     URL url = new URL(sURL);
                     HttpURLConnection huc = (HttpURLConnection) url.openConnection();
                     HttpURLConnection.setFollowRedirects(false);
-                    huc.setConnectTimeout(1 * 1000);
+                    huc.setConnectTimeout(2 * 1000);
                     huc.setRequestMethod("GET");
                     huc.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.1.2) Gecko/20090729 Firefox/3.5.2 (.NET CLR 3.5.30729)");
                     huc.connect();
+
+                    Thread.sleep(60);
 
                     // Convert to a JSON object to print data
                     JsonParser jp = new JsonParser(); //from gson
@@ -616,11 +640,13 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
         }
 
         if (JSONhasTheRoomId) {
-            Log.d("mytag", "If you see this, than the program has hope");
+            Log.d("mytag", infoAboutRoom.get(roomIDtoGet).getAsJsonObject().get(songId).getAsJsonObject().get("name") + ": " + theSongThatIsPassedToMethod.upvotes + " will turn to " + infoAboutRoom.get(roomIDtoGet).getAsJsonObject().get(songId).getAsJsonObject().get("votes").getAsInt());
             theSongThatIsPassedToMethod.upvotes = infoAboutRoom.get(roomIDtoGet).getAsJsonObject().get(songId).getAsJsonObject().get("votes").getAsInt();
         }
         else {
             throw new IllegalArgumentException("No such roomID.");
         }
+
+        adapter.notifyDataSetChanged();
     }
 }
