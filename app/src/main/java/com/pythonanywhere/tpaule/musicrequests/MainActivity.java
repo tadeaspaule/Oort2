@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 
+import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Typeface;
@@ -18,6 +19,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -150,6 +152,7 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
             roomID = Integer.parseInt(edit.getText().toString());
             flipper.showNext();
             setupList();
+            hideSoftKeyboard(this);
         }
         catch (Exception e) {
             edit.setText("");
@@ -252,6 +255,8 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
 
         // MARIUS
         // send songName & artistName
+
+        hideSoftKeyboard(this);
     }
 
     public void openSuggestBox(View view) {
@@ -313,6 +318,11 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
 
         }
         listItems.addAll(newList);
+    }
+
+    public static void hideSoftKeyboard(Activity activity) {
+        InputMethodManager inputMethodManager = (InputMethodManager)  activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
     }
 
     public void refreshList() {

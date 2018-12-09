@@ -35,7 +35,7 @@
                 android:text="go"
                 android:layout_centerHorizontal="true"
                 android:layout_below="@id/room_id_edit"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="10dp"
                 android:textColor="@color/textColor"
                 android:background="@drawable/black_yellow_rect"
                 android:onClick="enteredRoomID"/>
@@ -178,6 +178,7 @@
                     android:textColorHint="@color/textColor"
                     android:textColor="@color/textColor"
                     android:inputType="textShortMessage"
+                    android:layout_marginBottom="10dp"
                     android:imeOptions="actionNext"
                     android:gravity="center"/>
 
@@ -188,7 +189,7 @@
                     android:layout_centerHorizontal="true"
                     android:layout_below="@id/suggestion_artist_input"
                     android:textColor="@color/textColor"
-                    android:layout_marginTop="5dp"
+                    android:layout_marginTop="10dp"
                     android:background="@drawable/black_yellow_rect"
                     android:onClick="suggestSong"/>
 
