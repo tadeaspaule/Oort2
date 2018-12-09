@@ -21,8 +21,10 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.ViewFlipper;
 
 import com.opencsv.CSVReader;
 
@@ -53,6 +55,8 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
     Random random = new Random();
 
     SharedPreferences sharedPreferences;
+    int roomID;
+    ViewFlipper flipper;
 
     private Handler handler;
     private Runnable runnable;
@@ -75,6 +79,8 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
         Set<String> songSet = sharedPreferences.getStringSet("songs",null);
         artists = artistSet.toArray(new String[artistSet.size()]);
         songs = songSet.toArray(new String[songSet.size()]);
+
+        flipper = findViewById(R.id.flipper);
 
         currentSong = findViewById(R.id.current_song);
         currentArtist = findViewById(R.id.current_artist);
@@ -135,6 +141,25 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
         mLayoutManager = new LinearLayoutManager(this);
         songList.setLayoutManager(mLayoutManager);
 
+
+    }
+
+    public void enteredRoomID(View view) {
+        EditText edit = findViewById(R.id.room_id_edit);
+        try {
+            roomID = Integer.parseInt(edit.getText().toString());
+            flipper.showNext();
+            setupList();
+        }
+        catch (Exception e) {
+            edit.setText("");
+
+        }
+
+    }
+
+    private void setupList(){
+        // room id stored in roomID variable
         // get current song & artist
         // MARIUS
         String currentSongName = "PLACEHOLDER SONG"; // replace with current song name
@@ -386,7 +411,7 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
     public void scrollByOne() {
         offset++;
         if (offset > fullText.length() + 7) {
-            offset -= fullText.length();
+            offset -= fullText.length() + 7;
         }
     }
 }
