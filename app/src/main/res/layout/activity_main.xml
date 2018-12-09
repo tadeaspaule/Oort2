@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:background="@drawable/space">
+
+    <pl.droidsonroids.gif.GifImageView
+        android:layout_width="1000dp"
+        android:layout_height="1200dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/space_gif"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:weightSum="4">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <pl.droidsonroids.gif.GifImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_centerVertical="true"
+                android:src="@drawable/globe_gif"
+                android:layout_alignParentLeft="true"
+                android:layout_margin="10dp"/>
+
+            <pl.droidsonroids.gif.GifImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_centerVertical="true"
+                android:src="@drawable/globe_gif"
+                android:layout_alignParentRight="true"
+                android:layout_margin="10dp"/>
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_centerVertical="true"/>
+
+            <TextView
+                android:id="@+id/current_song"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                android:layout_above="@id/divider"
+                android:gravity="center"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@color/textColor"
+                android:text="Some Song name"/>
+
+            <TextView
+                android:id="@+id/current_artist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/divider"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                android:gravity="center"
+                android:textSize="20sp"
+                android:textStyle="italic"
+                android:textColor="@color/textColor"
+                android:text="Jake Cake"/>
+
+        </RelativeLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/song_list"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3"
+            android:scrollbars="none">
+
+
+        </android.support.v7.widget.RecyclerView>
+
+        <Button
+            android:id="@+id/suggest_button"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_below="@id/song_list"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="30dp"
+            android:layout_weight="0"
+            android:onClick="openSuggestBox"
+            android:textStyle="bold"
+            android:textColor="@color/textColor"
+            android:background="@drawable/yellow_border_rect"
+            android:padding="10dp"
+            android:textSize="20sp"
+            android:text="Suggest song" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/suggestion_box"
+        android:layout_width="300dp"
+        android:layout_height="200dp"
+        android:background="@drawable/black_yellow_rect"
+        android:layout_centerInParent="true"
+        android:visibility="gone">
+
+
+        <AutoCompleteTextView
+            android:id="@+id/suggestion_artist_input"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:hint="Artist name"
+            android:textColorHint="@color/textColor"
+            android:textColor="@color/textColor"
+            android:inputType="textShortMessage"
+            android:imeOptions="actionDone"
+            android:gravity="center"/>
+
+        <AutoCompleteTextView
+            android:id="@+id/suggestion_song_input"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@id/suggestion_artist_input"
+            android:hint="Song name"
+            android:textColorHint="@color/textColor"
+            android:textColor="@color/textColor"
+            android:inputType="textShortMessage"
+            android:imeOptions="actionNext"
+            android:gravity="center"/>
+
+        <Button
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="go"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/suggestion_artist_input"
+            android:textColor="@color/textColor"
+            android:background="@drawable/black_yellow_rect"
+            android:onClick="suggestSong"/>
+
+    </RelativeLayout>
+
+
+</RelativeLayout>
