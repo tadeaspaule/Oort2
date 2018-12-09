@@ -158,19 +158,19 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
         mLayoutManager = new LinearLayoutManager(this);
         songList.setLayoutManager(mLayoutManager);
 
-        ExecutorService executor = Executors.newFixedThreadPool(10);
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    getTheRoomsJsonByRoomId();
-                    Thread.sleep(500);
-                }
-                catch (Exception e) {
-                }
-
-            }
-        });
+//        ExecutorService executor = Executors.newFixedThreadPool(10);
+//        executor.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    getTheRoomsJsonByRoomId();
+//                    Thread.sleep(500);
+//                }
+//                catch (Exception e) {
+//                }
+//
+//            }
+//        });
     }
 
     public void enteredRoomID(View view) {
@@ -183,7 +183,6 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
         }
         catch (Exception e) {
             edit.setText("");
-
         }
     }
 
@@ -287,52 +286,70 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
 
     @Override
     public void upvoteItem(MyListItem itemToUpvote, int itemPosition) {
-        if (itemToUpvote.upvoted){
-            itemToUpvote.upvoted = false;
-            //itemToUpvote.upvotes--;
+        boolean isSecond = false;
+        MyListItem previousItem = null;
+        for (MyListItem item : listItems) {
+            if (item.upvoted && item != itemToUpvote) {
+                isSecond = true;
+                previousItem = item;
+                break;
+            }
+        }
+
+        if (isSecond) {
+            // upvote itemtoupvote, downvote previousitem
             songId = itemToUpvote.songID;
-            voteIncrement = "-1";
+            voteIncrement = "+1";
             try {
                 sendToFin();
                 updateVote(itemToUpvote);
+                itemToUpvote.upvoted = true;
+            }
+            catch (Exception e) {
+                Log.d("mytag", e.toString());
+            }
+
+            songId = previousItem.songID;
+            voteIncrement = "-1";
+            try {
+                sendToFin();
+                updateVote(previousItem);
+                itemToUpvote.upvoted = false;
             }
             catch (Exception e) {
                 Log.d("mytag", e.toString());
             }
         }
         else {
-            // first check if we had some other song upvoted
-            // we want to unupvote that, and notify the server
-            for (MyListItem item : listItems) {
-                if (item.upvoted && item != itemToUpvote) {
-                    item.upvoted = false;
-                    //item.upvotes--;
-                    songId = itemToUpvote.songID;
-                    voteIncrement = "-1";
-                    try {
-                        sendToFin();
-                        updateVote(itemToUpvote);
-                    }
-                    catch (Exception e) {
-                        Log.d("mytag", e.toString());
-                    }
-                    break;
+            if (itemToUpvote.upvoted) {
+                // downvote itemtoupvote
+                songId = itemToUpvote.songID;
+                voteIncrement = "-1";
+                try {
+                    sendToFin();
+                    updateVote(itemToUpvote);
+                    itemToUpvote.upvoted = false;
+                }
+                catch (Exception e) {
+                    Log.d("mytag", e.toString());
                 }
             }
-            itemToUpvote.upvoted = true;
-            //itemToUpvote.upvotes++;
-            songId = itemToUpvote.songID;
-            voteIncrement = "1";
-            try {
-                sendToFin();
-                updateVote(itemToUpvote);
-            }
-            catch (Exception e) {
-                Log.d("mytag", e.toString());
+            else {
+                // upvote itemtoupvote
+                songId = itemToUpvote.songID;
+                voteIncrement = "+1";
+                try {
+                    sendToFin();
+                    updateVote(itemToUpvote);
+                    itemToUpvote.upvoted = true;
+                }
+                catch (Exception e) {
+                    Log.d("mytag", e.toString());
+                }
             }
         }
         sortList();
-        adapter.notifyItemRangeChanged(0,listItems.size());
+        adapter.notifyItemRangeChanged(0, listItems.size());
     }
 
     private String getRandomString() {
@@ -532,22 +549,19 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
         String roomIDtoGet = "" + roomID;
         boolean JSONhasTheRoomId = false;
 
-        Set<Map.Entry<String, JsonElement>> roomIDs = infoAboutRoom.entrySet();
-        for (Map.Entry<String, JsonElement> roomID : roomIDs) {
-            if (roomID.getKey().equals(roomIDtoGet)) {
-                JSONhasTheRoomId = true;
-            }
+        if (infoAboutRoom.keySet().contains(roomIDtoGet)) {
+            JSONhasTheRoomId = true;
         }
 
         if (JSONhasTheRoomId) {
-            JsonArray songArray = infoAboutRoom.getAsJsonObject().get(roomIDtoGet).getAsJsonArray();
-            for (int j = 0; j < songArray.size(); j++) {
-                JsonElement song = songArray.get(j);
+            Set<String> keyset = infoAboutRoom.get(roomIDtoGet).getAsJsonObject().keySet();
+            for (String currentlyProcessesedSongId : keyset){
+                JsonObject songJson = infoAboutRoom.get(roomIDtoGet).getAsJsonObject().get(currentlyProcessesedSongId).getAsJsonObject();
 
-                String songID = song.getAsJsonObject().get("songID").getAsString();
-                String name = song.getAsJsonObject().get("name").getAsString();
-                String artist = song.getAsJsonObject().get("artist").getAsString();
-                int votes = song.getAsJsonObject().get("votes").getAsInt();
+                String songID = currentlyProcessesedSongId;
+                String name = songJson.get("name").getAsString();;
+                String artist = songJson.get("artist").getAsString();;
+                int votes = songJson.get("votes").getAsInt();
 
                 listItems.add(new MyListItem(artist, name, votes, songID));
             }
@@ -597,23 +611,13 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
         String roomIDtoGet = "" + roomID;
         boolean JSONhasTheRoomId = false;
 
-        Set<Map.Entry<String, JsonElement>> roomIDs = infoAboutRoom.entrySet();
-        for (Map.Entry<String, JsonElement> roomID : roomIDs) {
-            if (roomID.getKey().equals(roomIDtoGet)) {
-                JSONhasTheRoomId = true;
-            }
+        if (infoAboutRoom.keySet().contains(roomIDtoGet)) {
+            JSONhasTheRoomId = true;
         }
 
         if (JSONhasTheRoomId) {
-            JsonArray songArray = infoAboutRoom.getAsJsonObject().get(roomIDtoGet).getAsJsonArray();
-            for (int j = 0; j < songArray.size(); j++) {
-                JsonElement song = songArray.get(j);
-                String songID = song.getAsJsonObject().get("songID").getAsString();
-                if (songID.equals(theSongThatIsPassedToMethod.songID)) {
-                    int votes = song.getAsJsonObject().get("votes").getAsInt();
-                    theSongThatIsPassedToMethod.upvotes = votes;
-                }
-            }
+            Log.d("mytag", "If you see this, than the program has hope");
+            theSongThatIsPassedToMethod.upvotes = infoAboutRoom.get(roomIDtoGet).getAsJsonObject().get(songId).getAsJsonObject().get("votes").getAsInt();
         }
         else {
             throw new IllegalArgumentException("No such roomID.");
