@@ -25,7 +25,8 @@
                 android:textColorHint="@color/textColor"
                 android:textColor="@color/textColor"
                 android:layout_centerVertical="true"
-                android:inputType="textShortMessage"
+                android:background="@drawable/lower_yellow_line"
+                android:inputType="number"
                 android:layout_centerHorizontal="true"/>
 
             <Button
@@ -34,6 +35,7 @@
                 android:text="go"
                 android:layout_centerHorizontal="true"
                 android:layout_below="@id/room_id_edit"
+                android:layout_marginTop="5dp"
                 android:textColor="@color/textColor"
                 android:background="@drawable/black_yellow_rect"
                 android:onClick="enteredRoomID"/>
@@ -158,6 +160,7 @@
                     android:layout_centerHorizontal="true"
                     android:layout_centerVertical="true"
                     android:hint="Artist name"
+                    android:background="@drawable/lower_yellow_line"
                     android:textColorHint="@color/textColor"
                     android:textColor="@color/textColor"
                     android:inputType="textShortMessage"
@@ -171,6 +174,7 @@
                     android:layout_centerHorizontal="true"
                     android:layout_above="@id/suggestion_artist_input"
                     android:hint="Song name"
+                    android:background="@drawable/lower_yellow_line"
                     android:textColorHint="@color/textColor"
                     android:textColor="@color/textColor"
                     android:inputType="textShortMessage"
@@ -184,6 +188,7 @@
                     android:layout_centerHorizontal="true"
                     android:layout_below="@id/suggestion_artist_input"
                     android:textColor="@color/textColor"
+                    android:layout_marginTop="5dp"
                     android:background="@drawable/black_yellow_rect"
                     android:onClick="suggestSong"/>
 
