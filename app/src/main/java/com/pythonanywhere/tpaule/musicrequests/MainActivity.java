@@ -159,8 +159,8 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
         EditText edit = findViewById(R.id.room_id_edit);
         try {
             roomID = Integer.parseInt(edit.getText().toString());
-            flipper.showNext();
             setupList();
+            flipper.showNext();
         }
         catch (Exception e) {
             edit.setText("");
@@ -169,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
 
     }
 
-    private void setupList(){
+    private void setupList() throws Exception {
         // room id stored in roomID variable
         // get current song & artist
         // MARIUS
@@ -180,12 +180,12 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
         currentArtist.setText(currentArtistName);
 
         listItems = new ArrayList<>();
-        try {
+//        try {
             getTheRoomsJsonByRoomId();
-        }
-        catch (Exception e) {
-            Log.d("mytag", e.toString());
-        }
+//        }
+//        catch (Exception e) {
+//            Log.d("mytag", e.toString());
+//        }
         // get a list of songs from the server
         // MARdoneIUS, replace the for loop below (only placeholder so there are items in the list)
         // MARIUS add get for the current vote count every x seconds
@@ -538,7 +538,7 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
             }
         }
         else {
-            Log.d("mytag", "you fucked up!!");
+            throw new IllegalArgumentException("No such roomID.");
         }
     }
 }
