@@ -8,13 +8,15 @@ public class MyListItem {
     String songName;
     int upvotes;
     boolean upvoted;
+    String songID;
 
 
-    public MyListItem(String artist, String songName, int upvotes){
+    public MyListItem(String artist, String songName, int upvotes, String songID){
         this.artist = artist;
         this.songName = songName;
         this.upvotes = upvotes;
         this.upvoted = false;
+        this.songID = songID;
     }
 
 

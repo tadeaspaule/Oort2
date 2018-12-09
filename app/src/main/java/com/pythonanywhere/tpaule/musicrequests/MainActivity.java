@@ -28,6 +28,8 @@ import com.opencsv.CSVReader;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,6 +65,9 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
     String[] songs;
     HashMap<String,ArrayList<String>> artistSongMap = new HashMap<>();
 
+    String roomId = "";
+    String songId = "";
+    String voteIncrement = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -150,7 +155,8 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
             String song = getRandomString();
             String artist = getRandomString();
             int upvotes = random.nextInt(10);
-            listItems.add(new MyListItem(artist,song,upvotes));
+            String songID = "" + random.nextInt(10);
+            listItems.add(new MyListItem(artist,song,upvotes,songID));
         }
         sortList();
 
@@ -239,7 +245,16 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
             itemToUpvote.upvoted = false;
             itemToUpvote.upvotes--;
             // send to say that we unupvoted
-            // MARIUS
+            // MARdoneIUS
+            roomId = itemToUpvote.artist;
+            songId = itemToUpvote.songID;
+            voteIncrement = "-1";
+            try {
+                sendToFin();
+            }
+            catch (Exception e) {
+                Log.d("mytag", e.toString());
+            }
         }
         else {
             // first check if we had some other song upvoted
@@ -249,12 +264,30 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
                     item.upvoted = false;
                     item.upvotes--;
                     // send to say we unupvoted
-                    // MARIUS
+                    // MARdoneIUS
+                    roomId = itemToUpvote.artist;
+                    songId = itemToUpvote.songID;
+                    voteIncrement = "-1";
+                    try {
+                        sendToFin();
+                    }
+                    catch (Exception e) {
+                        Log.d("mytag", e.toString());
+                    }
                     break;
                 }
             }
             itemToUpvote.upvoted = true;
             itemToUpvote.upvotes++;
+            roomId = itemToUpvote.artist;
+            songId = itemToUpvote.songID;
+            voteIncrement = "1";
+            try {
+                sendToFin();
+            }
+            catch (Exception e) {
+                Log.d("mytag", e.toString());
+            }
         }
         sortList();
         adapter.notifyItemRangeChanged(0,listItems.size());
@@ -388,5 +421,31 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
         if (offset > fullText.length() + 7) {
             offset -= fullText.length();
         }
+    }
+
+    // From Marius
+
+    public void sendToFin() throws Exception {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try  {
+                    String sURL = "http://10.40.156.24:2567/api/sendvotes?id=" + roomId + "&songid=" + songId + "&voteincrement=" + voteIncrement;
+                    Log.d("mytag", sURL);
+                    URL url = new URL(sURL);
+                    HttpURLConnection huc = (HttpURLConnection) url.openConnection();
+                    huc.setConnectTimeout(2 * 1000);
+                    huc.setRequestMethod("GET");
+                    huc.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.1.2) Gecko/20090729 Firefox/3.5.2 (.NET CLR 3.5.30729)");
+                    Log.d("mytag", "success3");
+                    huc.connect();
+                    Log.d("mytag", "success4");
+                    huc.getContent();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
     }
 }
