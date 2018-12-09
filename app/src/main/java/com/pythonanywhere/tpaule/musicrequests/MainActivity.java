@@ -185,7 +185,6 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
             edit.setText("");
 
         }
-
     }
 
     private void setupList() throws Exception {
@@ -202,7 +201,6 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
 
         getTheRoomsJsonByRoomId();
         // get a list of songs from the server
-        // MARdoneIUS, replace the for loop below (only placeholder so there are items in the list)
         // MARIUS add get for the current vote count every x seconds
         sortList();
 
