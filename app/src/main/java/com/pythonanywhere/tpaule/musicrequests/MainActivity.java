@@ -513,7 +513,7 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
             @Override
             public void run() {
                 try  {
-                    String sURL = "http://10.40.156.24:2567/api/sendvotes?id=" + roomID + "&songid=" + songId + "&voteincrement=" + voteIncrement;
+                    String sURL = "http://oort.herokuapp.com/api/sendvotes?id=" + roomID + "&songid=" + songId + "&voteincrement=" + voteIncrement;
                     Log.d("mytag", sURL);
                     URL url = new URL(sURL);
                     HttpURLConnection huc = (HttpURLConnection) url.openConnection();
@@ -536,7 +536,7 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
             @Override
             public void run() {
                 try  {
-                    String sURL = "http://10.40.156.24:2567/api/rooms"; //just a string
+                    String sURL = "http://oort.herokuapp.com/api/rooms"; //just a string
                     URL url = new URL(sURL);
                     HttpURLConnection huc = (HttpURLConnection) url.openConnection();
                     HttpURLConnection.setFollowRedirects(false);
@@ -599,7 +599,7 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter2.Li
             @Override
             public void run() {
                 try  {
-                    String sURL = "http://10.40.156.24:2567/api/rooms"; //just a string
+                    String sURL = "http://oort.herokuapp.com/api/rooms"; //just a string
                     URL url = new URL(sURL);
                     HttpURLConnection huc = (HttpURLConnection) url.openConnection();
                     HttpURLConnection.setFollowRedirects(false);
